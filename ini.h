@@ -9,75 +9,64 @@
 #include <map>
 #include <iterator>
 
-
-class IniParameter
-{
-private:
-    std::string name;
-    std::string value;
-public:
-    IniParameter();
-
-    IniParameter(std::string);
-
-    IniParameter(std::string, std::string);
-
-    IniParameter(const IniParameter&);
-
-    IniParameter& operator=(const IniParameter&);
-
-    ~IniParameter();
-
-
-};
-
-
 class IniSection
 {
 private:
+    std::map<std::string, std::string> parameters;
+    std::string path;
     std::string name;
-    std::map<std::string, IniParameter> parameters;
 public:
-    IniSection();
 
-    IniSection(std::string);
+    explicit IniSection(const std::string&, const std::string&);
 
-    IniSection(const IniSection& p);
+    //copy constructor default
 
-    IniSection& operator=(const IniSection& p);
+    //operator= default
 
     ~IniSection();
 
- };
+    void insert(const std::string&, const std::string&);
+
+    std::map<std::string, std::string>::iterator get(const std::string&);
+
+    void add(const std::string&, const std::string&);
+
+    void remove(const std::string&);
+
+
+    IniSection(){}
+};
 
 class IniFile
 {
 private:
-    std::string path;
     std::map<std::string, IniSection> sections;
+    std::string path;
 
+    void add_section(const std::string&);
+
+    void add_parameter(const std::string&, const std::string&);
 
 public:
-    IniFile();
+    IniFile(){}
 
-    explicit IniFile(std::string);
-
-    IniFile(const IniFile& p);
+    explicit IniFile(const std::string&);
 
     ~IniFile();
 
-    IniFile& operator=(const IniFile& p);
+    void open(const std::string&);
 
-    IniFile open(std::string);
-
-    IniFile open(FILE*);
-
-    std::map<std::string, IniSection>::iterator get(std::string);
+    std::map<std::string, IniSection>::iterator get(const std::string&);
 
     std::map<std::string, IniSection>::iterator begin();
 
     std::map<std::string, IniSection>::iterator end();
 
+    std::map<std::string, IniSection>& get_full();
+
+    void add(const std::string&);
+
+    void remove(const std::string&);
 
 };
 
