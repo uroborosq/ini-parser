@@ -135,12 +135,15 @@ void IniFile::remove(const std::string& name) {
         std::string tmp;
 
         std::vector<std::string> all_file;
-        while (!file.eof()) {
+        while (!file.eof())
+        {
             getline(file, tmp);
 
-            if (tmp == '[' + name + ']') {
+            if (tmp == '[' + name + ']')
+            {
                 getline(file, tmp);
-                while (!file.eof() and is_section(tmp)) {
+                while (!file.eof() and !is_section(tmp))
+                {
                     if (*tmp.begin() == ';')
                         all_file.push_back(tmp);
                     getline(file, tmp);
