@@ -1,16 +1,18 @@
 #include <iostream>
 #include "ini.h"
-#include <fstream>
 using namespace std;
 
 int main() {
     IniFile minecraft_pro;
     minecraft_pro.open("test.ini");
-    minecraft_pro.add("new section");
-    minecraft_pro.get("new section")->second.add("horosho", "ploho");
-    minecraft_pro.get("section1")->second.remove("chubr_version");
-    minecraft_pro.remove("special data");
+    minecraft_pro.get("section1")->add("122112325", "1");
+    minecraft_pro.add("samurai")->add("hru", "hru");
 
-    map<std::string, IniSection> o = minecraft_pro.get_full();
+    minecraft_pro.remove("new section");
+
+    minecraft_pro.get("qdqwad")->add("wso", "2");
+
+    vector<IniSection> o = minecraft_pro.get_full();
+
     return 0;
 }

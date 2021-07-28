@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <iterator>
+#include <vector>
 
 class IniSection
 {
@@ -17,11 +18,17 @@ private:
     std::string name;
 public:
 
+    //default constructor default
+
     explicit IniSection(const std::string&, const std::string&);
 
     //copy constructor default
 
     //operator= default
+
+    bool operator==(const IniSection& p);
+
+    bool operator==(const std::string& p);
 
     ~IniSection();
 
@@ -33,14 +40,13 @@ public:
 
     void remove(const std::string&);
 
-
-    IniSection(){}
 };
 
 class IniFile
 {
 private:
-    std::map<std::string, IniSection> sections;
+    std::map<std::string, IniSection&> p_sections;
+    std::vector<IniSection> sections;
     std::string path;
 
     void add_section(const std::string&);
@@ -56,15 +62,15 @@ public:
 
     void open(const std::string&);
 
-    std::map<std::string, IniSection>::iterator get(const std::string&);
+    std::vector<IniSection>::iterator get(const std::string&);
 
-    std::map<std::string, IniSection>::iterator begin();
+    std::vector<IniSection>::iterator begin();
 
-    std::map<std::string, IniSection>::iterator end();
+    std::vector<IniSection>::iterator end();
 
-    std::map<std::string, IniSection>& get_full();
+    std::vector<IniSection> & get_full();
 
-    void add(const std::string&);
+    std::vector<IniSection>::iterator add(const std::string&);
 
     void remove(const std::string&);
 
