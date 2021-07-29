@@ -16,11 +16,12 @@ private:
     std::map<std::string, std::string> parameters;
     std::string path;
     std::string name;
+    std::string line_ending;
 public:
 
     //default constructor default
 
-    explicit IniSection(const std::string&, const std::string&);
+    explicit IniSection(const std::string&, const std::string&, const std::string&);
 
     //copy constructor default
 
@@ -45,13 +46,9 @@ public:
 class IniFile
 {
 private:
-    std::map<std::string, IniSection&> p_sections;
     std::vector<IniSection> sections;
     std::string path;
-
-    void add_section(const std::string&);
-
-    void add_parameter(const std::string&, const std::string&);
+    std::string line_ending;
 
 public:
     IniFile(){}

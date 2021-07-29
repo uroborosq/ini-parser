@@ -12,9 +12,42 @@ bool is_section(std::string str)
     {
         if (*str.begin() == '[' and *(str.end() - 1) == ']')
             return true;
+        if (str.size() >= 3)
+        {
+            if (*str.begin() == '[' and *(str.end() - 2) == ']' and *(str.end() - 1) == '\r')
+                return true;
+        }
     }
     return false;
 }
+
+std::string readline(std::fstream& file, std::string& str)
+{
+    getline(file, str);
+    if (!str.empty())
+    {
+        if (*(str.end() - 1) == '\r')
+        {
+            str = str.substr(0, str.size() - 1);
+            return "crlf";
+        }
+    }
+    return "lf";
+}
+
+void writeline(std::fstream& file, std::string str, const std::string& line_ending)
+{
+    if (line_ending == "lf")
+    {
+        file << str << '\n';
+    }
+    else
+    {
+        file << str << "\r\n";
+    }
+}
+
+
 
 
 IniFile::IniFile(const std::string& input) {
@@ -34,7 +67,7 @@ void IniFile::open(const std::string& input)
 
     if(file)
     {
-        getline(file, tmp);
+        line_ending = readline(file, tmp);
 
         while(!file.eof())
         {
@@ -42,7 +75,7 @@ void IniFile::open(const std::string& input)
             {
                 if (*tmp.begin() == ';') //its comment, skip
                 {
-                    getline(file, tmp);
+                    readline(file, tmp);
                     continue;
                 }
 
@@ -50,19 +83,18 @@ void IniFile::open(const std::string& input)
                 else if(is_section(tmp)) // new section
                 {
                     std::string name;
-                    for (unsigned long i = 1; i < tmp.size() - 1; i++)
+                    for (unsigned long i = 1 ; i < tmp.size() - 1; i++)
                         name.push_back(tmp[i]);
-
-                    sections.push_back(IniSection(path, name));
-                    getline(file, tmp);
-                    while(!file.eof() && tmp.find('[') == std::string::npos) //parsing parameters
+                    sections.push_back(IniSection(path, name, line_ending));
+                    readline(file, tmp);
+                    while(!file.eof() && !is_section(tmp)) //parsing parameters
                     {
 
                         if(!tmp.empty())
                         {
                             if(*tmp.begin() == ';')
                             {
-                                getline(file, tmp);
+                                readline(file, tmp);
                                 continue;
                             }
                             else if(tmp.find('=') != std::string::npos)
@@ -76,7 +108,7 @@ void IniFile::open(const std::string& input)
                                 find(sections.begin(), sections.end(), name)->insert(parameter_name, parameter_value);
                             }
                         }
-                        getline(file, tmp);
+                        readline(file, tmp);
                     }
                 }
             }
@@ -107,23 +139,16 @@ std::vector<IniSection> &IniFile::get_full() {
     return sections;
 }
 
-void IniFile::add_section(const std::string& section_name) {
-
-}
-
-void IniFile::add_parameter(const std::string& key, const std::string& value) {
-
-}
-
 std::vector<IniSection>::iterator IniFile::add(const std::string& section) {
     if(find(sections.begin(), sections.end(), section) == sections.end())
     {
-        std::ofstream file;
+        std::fstream file;
         file.open(path.c_str(), std::ios_base::out | std::ios_base::app);
-        file << std::endl << '[' + section + ']';
+        writeline(file, "", line_ending);
+        writeline(file, '[' + section + ']', line_ending);
         file.close();
 
-        sections.push_back(IniSection(path, section));
+        sections.push_back(IniSection(path, section, line_ending));
     }
     return find(sections.begin(), sections.end(), section);
 }
@@ -137,16 +162,16 @@ void IniFile::remove(const std::string& name) {
         std::vector<std::string> all_file;
         while (!file.eof())
         {
-            getline(file, tmp);
+            readline(file, tmp);
 
             if (tmp == '[' + name + ']')
             {
-                getline(file, tmp);
+                readline(file, tmp);
                 while (!file.eof() and !is_section(tmp))
                 {
                     if (*tmp.begin() == ';')
                         all_file.push_back(tmp);
-                    getline(file, tmp);
+                    readline(file, tmp);
                 }
                 all_file.push_back(tmp);
             } else
@@ -156,7 +181,7 @@ void IniFile::remove(const std::string& name) {
         file.open(path.c_str(), std::ios_base::out);
         unsigned long size = all_file.size();
         for (unsigned long i = 0; i < size; i++) {
-            file << all_file[i] << std::endl;
+            writeline(file, all_file[i], line_ending);
         }
         file.close();
 
@@ -166,9 +191,10 @@ void IniFile::remove(const std::string& name) {
 
 
 
-IniSection::IniSection(const std::string& _path, const std::string& _name) {
+IniSection::IniSection(const std::string& _path, const std::string& _name, const std::string& _line_ending) {
     path = _path;
     name = _name;
+    line_ending = _line_ending;
 }
 
 IniSection::~IniSection() {
@@ -191,20 +217,20 @@ void IniSection::add(const std::string& section, const std::string& parameter) {
 
         std::vector<std::string> all_file;
         while (!file.eof())
-            getline(file, tmp), all_file.push_back(tmp);
+            readline(file, tmp), all_file.push_back(tmp);
 
         file.close();
         file.open(path.c_str(), std::ios_base::out);
         unsigned long size = all_file.size() + 1;
         for (unsigned long i = 0; i < size; i++) {
             if (all_file[i] == '[' + name + ']') {
-                file << all_file[i] << std::endl;
+                writeline(file, all_file[i], line_ending);
                 i++;
                 while (i < size - 1 and is_section(all_file[i]))
-                    file << all_file[i] << std::endl, i++;
-                file << section + '=' + parameter << std::endl;
+                    writeline(file, all_file[i], line_ending), i++;
+                writeline(file, section + '=' + parameter, line_ending);
             }
-            file << all_file[i] << std::endl;
+            writeline(file, all_file[i], line_ending);
         }
         file.close();
 
@@ -220,12 +246,12 @@ void IniSection::remove(const std::string& parameter) {
 
         std::vector<std::string> all_file;
         while (!file.eof()) {
-            getline(file, tmp);
+            readline(file, tmp);
 
             if (tmp == '[' + name + ']') {
                 all_file.push_back(tmp);
                 while (!file.eof()) {
-                    getline(file, tmp);
+                    readline(file, tmp);
                     if (tmp.find(parameter) != std::string::npos)
                         break;
                     all_file.push_back(tmp);
@@ -239,7 +265,7 @@ void IniSection::remove(const std::string& parameter) {
         file.open(path.c_str(), std::ios_base::out);
         unsigned long size = all_file.size();
         for (unsigned long i = 0; i < size; i++) {
-            file << all_file[i] << std::endl;
+            writeline(file, all_file[i], line_ending);
         }
         file.close();
 
