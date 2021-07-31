@@ -40,8 +40,8 @@ public:
     void add(const std::string&, const std::string&);
 
     void remove(const std::string&);
-    std::string getName(){return name;}
-    std::map<std::string, std::string>& getParameters (){return parameters;}
+    std::string get_name(){return name;}
+    std::map<std::string, std::string>& get_parameters (){return parameters;}
 
 };
 
