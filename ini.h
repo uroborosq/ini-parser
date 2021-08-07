@@ -4,16 +4,14 @@
 
 #ifndef INI_PARSER_INI_H
 #define INI_PARSER_INI_H
-#include <fstream>
 #include <string>
 #include <map>
-#include <iterator>
 #include <vector>
 
-class IniSection
+class IniSection : public std::map<std::string, std::string>
 {
 private:
-    std::map<std::string, std::string> parameters;
+    
     std::string path;
     std::string name;
     std::string line_ending;
@@ -31,7 +29,7 @@ public:
 
     bool operator==(const std::string& p);
 
-    ~IniSection();
+    virtual ~IniSection();
 
     void insert(const std::string&, const std::string&);
 
@@ -40,15 +38,13 @@ public:
     void add(const std::string&, const std::string&);
 
     void remove(const std::string&);
-    std::string get_name(){return name;}
-    std::map<std::string, std::string>& get_parameters (){return parameters;}
-
+    std::string getName(){return name;}
+ 
 };
 
-class IniFile
+class IniFile : public std::vector<IniSection>
 {
 private:
-    std::vector<IniSection> sections;
     std::string path;
     std::string line_ending;
 
@@ -57,17 +53,11 @@ public:
 
     explicit IniFile(const std::string&);
 
-    ~IniFile();
+    virtual ~IniFile();
 
-    void open(const std::string&);
+    int open(const std::string&);
 
     std::vector<IniSection>::iterator get(const std::string&);
-
-    std::vector<IniSection>::iterator begin();
-
-    std::vector<IniSection>::iterator end();
-
-    std::vector<IniSection> & get_full();
 
     std::vector<IniSection>::iterator add(const std::string&);
 
