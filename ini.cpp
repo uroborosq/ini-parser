@@ -2,7 +2,7 @@
 // Created by uroborosq on 22.07.2021.
 //
 
-#include "nvIni.h"
+#include "ini.h"
 #include <fstream>
 #include <algorithm>
 
@@ -47,7 +47,38 @@ void writeline(std::fstream& file, std::string str, const std::string& line_endi
     }
 }
 
+void remove_extra_symbols(std::string& str)
+{
+    unsigned long pointer = 0;
+    for (unsigned long i = 0; i < str.size(); ++i)
+    {
+        if (str[i] != ' ' and str[i] != '\t')
+        {
+            pointer = i;
+            break;
+        }
+    }
 
+    str = str.substr(pointer);
+
+    for (unsigned long i = str.size() - 1; i >= 0; --i)
+    {
+        if (str[i] != ' ' and str[i] != '\t' or i == 0)
+        {
+            pointer = i;
+            break;
+        }
+    }
+
+    str = str.substr(0, pointer + 1);
+
+    if (!str.empty())
+    {
+        if (*str.begin() == '"' and *(str.end() - 1) == '"')
+            str = str.substr(1, str.size() - 2);
+    }
+
+}
 
 
 IniFile::IniFile(const std::string& input) {
@@ -82,13 +113,16 @@ int IniFile::open(const std::string& input)
                 else if(is_section(tmp)) // new section
                 {
                     std::string name;
-                    for (unsigned long i = 1 ; i < tmp.size() - 1; i++)
-                        name.push_back(tmp[i]);
+//                    for (unsigned long i = 1 ; i < tmp.size() - 1; i++)
+//                        name.push_back(tmp[i]);
+                    name = tmp.substr(1, tmp.size() - 2); // ?
+                    remove_extra_symbols(name);
                     push_back(IniSection(path, name, line_ending));
-                    readline(file, tmp);
-                    while(!file.eof() && !is_section(tmp)) //parsing parameters
+                    bool first_iter = true;
+                    while(!file.eof() and !is_section(tmp) or first_iter) //parsing parameters
                     {
-
+                        first_iter = false;
+                        readline(file, tmp);
                         if(!tmp.empty())
                         {
                             if(*tmp.begin() == ';')
@@ -99,15 +133,19 @@ int IniFile::open(const std::string& input)
                             else if(tmp.find('=') != std::string::npos)
                             {
                                 std::string parameter_name, parameter_value;
-                                for (unsigned long i = 0; i < tmp.find('='); i++)
-                                    parameter_name.push_back(tmp[i]);
-                                for (unsigned long i = tmp.find('=') + 1; i < tmp.size(); i++)
-                                    parameter_value.push_back(tmp[i]);
+
+                                unsigned long pos = tmp.find('=');
+
+                                parameter_name = tmp.substr(0, pos);
+                                parameter_value = tmp.substr(pos + 1, tmp.size() - pos);
+
+                                remove_extra_symbols(parameter_name);
+                                remove_extra_symbols(parameter_value);
 
                                 find(begin(), end(), name)->insert(parameter_name, parameter_value);
                             }
                         }
-                        readline(file, tmp);
+                        //readline(file, tmp);
                     }
                 }
             }
