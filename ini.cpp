@@ -142,11 +142,15 @@ int IniFile::open(const std::string& input)
                                 remove_extra_symbols(parameter_name);
                                 remove_extra_symbols(parameter_value);
 
-                                find(begin(), end(), name)->insert(parameter_name, parameter_value);
+                                std::find(begin(), end(), name)->insert(make_pair(parameter_name, parameter_value));
                             }
                         }
                         //readline(file, tmp);
                     }
+                }
+                else
+                {
+                    readline(file, tmp);
                 }
             }
         }
@@ -227,10 +231,6 @@ IniSection::IniSection(const std::string& _path, const std::string& _name, const
 
 IniSection::~IniSection() {
  
-}
-
-void IniSection::insert(const std::string& key, const std::string& value)  {
-    std::map<std::string, std::string>::insert(std::pair<std::string, std::string>(key, value));
 }
 
 std::map<std::string, std::string>::iterator IniSection::get(const std::string& key) {

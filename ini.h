@@ -4,17 +4,19 @@
 
 #ifndef INI_PARSER_INI_H
 #define INI_PARSER_INI_H
+
 #include <string>
 #include <map>
 #include <vector>
 
-class IniSection : public std::map<std::string, std::string>
+class IniSection : private std::map<std::string, std::string>
 {
 private:
     
     std::string path;
     std::string name;
     std::string line_ending;
+
 public:
 
     //default constructor default
@@ -31,18 +33,21 @@ public:
 
     virtual ~IniSection();
 
-    void insert(const std::string&, const std::string&);
+    
 
     std::map<std::string, std::string>::iterator get(const std::string&);
 
     void add(const std::string&, const std::string&);
 
     void remove(const std::string&);
+
     std::string getName(){return name;}
+
+    friend class IniFile;
  
 };
 
-class IniFile : public std::vector<IniSection>
+class IniFile : private std::vector<IniSection>
 {
 private:
     std::string path;
