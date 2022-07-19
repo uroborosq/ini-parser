@@ -9,10 +9,10 @@
 #include <map>
 #include <vector>
 
-class IniSection : private std::map<std::string, std::string>
+class IniSection
 {
 private:
-    
+    std::map<std::string, std::string> arguments;
     std::string path;
     std::string name;
     std::string line_ending;
@@ -47,9 +47,10 @@ public:
  
 };
 
-class IniFile : private std::vector<IniSection>
+class IniFile
 {
 private:
+    std::vector<IniSection> sections;
     std::string path;
     std::string line_ending;
 
